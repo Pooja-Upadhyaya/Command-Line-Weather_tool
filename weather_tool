@@ -1,0 +1,87 @@
+import argparse
+import requests
+import datetime
+
+#API Key for openweather
+API_KEY = "5dd57b45d25d31f9992c455e713fdfe1"
+
+#Base URL for openweathermap API
+BASE_URL = "https://api.openweathermap.org/data/2.5/weather?"
+
+#Weather icons
+WEATHER_ICONS = {
+    #day icons
+    "01d": "☀️",
+    "02d": "🌤",
+    "03d": "🌥",
+    "04d": "☁️",
+    "09d": "🌧",   
+    "10d": "🌦",
+    "11d": "🌩",
+    "13d": "🌨",
+    "50d": "🌫",
+    #night icons
+    "01n": "🌙",
+    "02n": "🌤",
+    "03n": "🌥",
+    "04n": "☁️",
+    "09n": "🌧",
+    "10n": "🌦",
+    "11n": "🌩",
+    "13n": "🌨",
+    "50n": "🌫",
+}
+
+parser = argparse.ArgumentParser(description="Weather Forecast Tool")
+parser.add_argument("city", help="City name")
+args = parser.parse_args()
+
+url = f"{BASE_URL}q={args.city}&appid={API_KEY}&units=metric"
+
+#make API request and parse response using requests module
+response = requests.get(url)
+if response.status_code != 200:
+    print("Error fetching weather data")
+    exit()
+
+#function to convert unix timestamp to time
+def unix_to_time(timestamp):
+    return datetime.datetime.fromtimestamp(timestamp).strftime("%H:%M:%S")
+
+#function to convert timezone to local time offset in UTC
+def timezone_to_offset(timezone):
+    return datetime.datetime.now(datetime.timezone(datetime.timedelta(seconds=timezone))).strftime("%z")
+
+
+#extract weather data from JSON
+data = response.json()
+Temperature = data["main"]['temp']
+Feels_like = data["main"]['feels_like']
+Minimun_Temperature = data["main"]['temp_min'] 
+Maximum_Temperature = data["main"]['temp_max']  
+Pressure = data["main"]['pressure']
+Humidity = data["main"]['humidity']
+Clouds_percentage = data["clouds"]['all']
+Wind_Speed = data["wind"]['speed']
+Weather_description = data["weather"][0]['description']
+Weather_icon = data["weather"][0]['icon']
+Sunrise = data["sys"]['sunrise']    
+Sunset = data["sys"]['sunset']
+Country = data["sys"]['country']
+timezone = data["timezone"]
+
+#output weather data
+weather_icon = WEATHER_ICONS[Weather_icon]  
+print(f"{weather_icon} {Weather_description}")
+print(f"Temperature: {Temperature}°C")
+print(f"Feels like: {Feels_like}°C")
+print(f"Minimun Temperature: {Minimun_Temperature}°C")
+print(f"Maximum Temperature: {Maximum_Temperature}°C")
+print(f"Pressure: {Pressure} hPa")
+print(f"Humidity: {Humidity}%")
+print(f"Clouds: {Clouds_percentage}%")
+print(f"Wind Speed: {Wind_Speed} m/s")
+print(f"Sunrise: {unix_to_time(Sunrise)}")
+print(f"Sunset: {unix_to_time(Sunset)}")
+print(f"Country: {Country}")
+print(f"Timezone: UTC {timezone_to_offset(timezone)}")
