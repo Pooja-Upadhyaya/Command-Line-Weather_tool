@@ -16,7 +16,7 @@ Visual weather indicators using emoji icons
 Country identification
 
 Usage
-python weather.py [city_name]
+python weather_tool.py [city_name]
 
 Requirements
 Python 3.x
